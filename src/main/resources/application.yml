@@ -1,0 +1,49 @@
+# 공통 설정 (모든 환경)
+spring:
+  application:
+    name: lecture-server
+  profiles:
+    default: local          # 아무 프로필도 안 주면 local 로 실행
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update      # 엔티티를 보고 테이블을 자동으로 만들고 고침 (강의용. 실서비스는 Flyway 권장)
+
+server:
+  port: ${PORT:8080}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:local-dev-secret-change-me-0123456789abcdef}   # 32자 이상
+    expires-minutes: 60
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health     # /actuator/health 로 서버 살아있는지 확인
+
+---
+# local: 설치 없이 바로 실행 (메모리 DB, 끄면 데이터 사라짐)
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:h2:mem:lecture;MODE=PostgreSQL
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true         # http://localhost:8080/h2-console
+
+---
+# supabase: 실제 PostgreSQL 에 연결. 접속 정보는 환경 변수로 받는다 (코드·Git 에 비밀번호 금지)
+spring:
+  config:
+    activate:
+      on-profile: supabase
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
